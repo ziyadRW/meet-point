@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleMap, Marker } from '@react-google-maps/api';
+import { FaTrash, FaMapMarkerAlt, FaMapMarkedAlt } from 'react-icons/fa';
 import axios from 'axios';
 
 function LocationList({ locations, setLocations }) {
@@ -16,7 +17,6 @@ function LocationList({ locations, setLocations }) {
     updatedLocations[index] = { ...updatedLocations[index], lat, lng };
     setLocations(updatedLocations);
 
-    // Fetch the updated address based on the new coordinates
     try {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
@@ -33,18 +33,19 @@ function LocationList({ locations, setLocations }) {
 
   return (
     <div className="mt-4">
-      <h3 className="text-2xl font-bold mb-4">Current Locations:</h3>
+      <h3 className="text-2xl font-bold text-primary mb-4">Current Locations:</h3>
       {locations.map((location, index) => (
         <div key={index} className="flex flex-col mb-4 p-4 border rounded-md">
-          <p>
+          <p className="flex items-center">
+            <FaMapMarkerAlt className="mr-2 text-primary" />
             Person {index + 1} - Address: {location.address}
           </p>
           <div className="flex gap-4 mt-2">
             <button
               onClick={() => handleRemove(index)}
-              className="text-red-500 underline"
+              className="text-red-500 flex items-center"
             >
-              Remove
+              <FaTrash className="mr-2" /> Remove
             </button>
             <button
               onClick={() =>
@@ -52,8 +53,9 @@ function LocationList({ locations, setLocations }) {
                   viewingLocationIndex === index ? null : index
                 )
               }
-              className="text-blue-500 underline"
+              className="text-blue-500 flex items-center"
             >
+              <FaMapMarkedAlt className="mr-1" />
               {viewingLocationIndex === index ? 'Hide Map' : 'View & Edit on Map'}
             </button>
           </div>

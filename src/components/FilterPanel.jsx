@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaFilter } from 'react-icons/fa';
 
 function FilterPanel({ setPlaces }) {
   const [filters, setFilters] = useState({
@@ -22,8 +23,11 @@ function FilterPanel({ setPlaces }) {
   };
 
   return (
-    <div className="filter-panel mb-6">
-      <h3 className="text-xl font-bold mb-4">Filter Results</h3>
+    <div className="filter-panel mb-6 p-4 border rounded-lg shadow-sm bg-white">
+      <h3 className="text-xl font-bold mb-4 flex items-center">
+        <FaFilter className="mr-2 text-primary" />
+        Filter Results
+      </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block mb-2">Rating:</label>
@@ -49,7 +53,7 @@ function FilterPanel({ setPlaces }) {
         </div>
       </div>
       <button
-        className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4"
+        className="bg-primary text-white px-4 py-2 rounded-lg mt-4 hover:bg-primary-dark"
         onClick={applyFilters}
       >
         Apply Filters

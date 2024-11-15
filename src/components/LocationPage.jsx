@@ -4,6 +4,7 @@ import LocationList from './LocationList';
 import MidpointCalculator from './MidpointCalculator';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaSearch, FaArrowLeft, FaUsers } from 'react-icons/fa';
 
 function LocationPage({
   locations,
@@ -25,9 +26,12 @@ function LocationPage({
     }
   }, [locations, peopleCount, setMidpoint]);
 
+
   const handlePeopleCountChange = (e) => {
-    setPeopleCount(Number(e.target.value));
-  };
+    const value = Number(e.target.value);
+    if (value <= 100) {
+      setPeopleCount(value);
+      }};
 
   const handleLocationSelect = (location) => {
     setLocations((prevLocations) => [...prevLocations, location]);
@@ -63,18 +67,24 @@ function LocationPage({
 
   return (
     <div className="container mx-auto p-8 max-w-2xl text-center">
-      <h1 className="text-4xl font-bold mb-6">MeetPoint - Meetup Organizer App</h1>
+      <h1 className="text-4xl font-bold mb-6 text-primary">MeetPoint - Meetup Organizer App</h1>
       <div className="flex items-center gap-4 justify-center mb-6">
+      <div className="relative w-1/4">
+        <FaUsers className="absolute left-3 top-3 text-primary" />
         <input
           type="number"
           min="1"
           value={peopleCount}
           onChange={handlePeopleCountChange}
-          className="w-1/4 p-2 border border-gray-300 rounded-lg"
+          className="w-full p-2 pl-10 border border-gray-300 rounded-lg"
           placeholder="Number of people"
         />
+      </div>
+      <div className="relative w-full">
         <LocationInput onSelectLocation={handleLocationSelect} />
       </div>
+    </div>
+
       <LocationList locations={locations} setLocations={setLocations} />
 
       {locations.length < peopleCount && peopleCount > 0 && (
@@ -99,9 +109,8 @@ function LocationPage({
             />
             <button
               onClick={handleSearchSubmit}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-            >
-              Search
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">
+              <FaSearch className="mr-2" />
             </button>
           </div>
         </div>

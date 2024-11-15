@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
+import { FaMapMarkerAlt, FaMapMarkedAlt } from 'react-icons/fa';
 
 const libraries = ['places'];
 
@@ -51,15 +52,19 @@ function LocationSelector({ peopleCount, locations, setLocations }) {
   return (
     <div>
       {locations.map((location, index) => (
-        <div key={index} className="mb-6">
-          <h3 className="text-lg font-semibold">Person {index + 1} Location</h3>
+        <div key={index} className="mb-6 p-4 border rounded-lg shadow-sm bg-white">
+          <h3 className="text-lg font-semibold flex items-center">
+            <FaMapMarkerAlt className="mr-2 text-primary" />
+            Person {index + 1} Location
+          </h3>
           {isLoaded && currentEditIndex !== index ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-2">
               <span className="font-medium">{location.address || 'No location set yet'}</span>
               <button
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark flex items-center"
                 onClick={() => setCurrentEditIndex(index)}
               >
+                <FaMapMarkedAlt className="mr-2" />
                 View/Edit on Map
               </button>
             </div>
@@ -72,7 +77,7 @@ function LocationSelector({ peopleCount, locations, setLocations }) {
                 <input
                   type="text"
                   placeholder="Search for a location"
-                  className="w-full p-2 mb-2 border rounded"
+                  className="w-full p-2 mb-2 border rounded-lg"
                   defaultValue={location.address}
                 />
               </Autocomplete>

@@ -6,9 +6,8 @@ function SearchBar({ midpoint, setPlaces }) {
 
   const handleSearch = async () => {
     try {
-      // Update the API call to your backend proxy server
       const response = await axios.get(
-        `http://localhost:3001/api/places`, // Your backend proxy endpoint
+        `http://localhost:3001/api/places`,
         {
           params: {
             query: keyword,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 
 function PlaceItem({ place }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -87,7 +88,6 @@ function PlaceItem({ place }) {
 
   return (
     <div className="place-item p-4 border rounded-lg shadow-lg bg-white relative">
-      {/* Image Carousel */}
       {photos.length > 0 && (
         <div className="relative mb-4">
           <img
@@ -114,10 +114,8 @@ function PlaceItem({ place }) {
         </div>
       )}
 
-      {/* Place Name */}
       <h4 className="text-lg font-bold mb-2">{place.name}</h4>
 
-      {/* Rating Stars */}
       {place.rating && (
         <div className="mb-2">
           <div className="flex items-center">
@@ -137,17 +135,20 @@ function PlaceItem({ place }) {
         </div>
       )}
 
-      {/* Distance from Midpoint */}
       {place.distance && (
-        <p className="text-sm text-gray-600 mb-2">{`Distance from midpoint: ${place.distance} km`}</p>
+        <p className="text-sm text-gray-600 mb-2">
+          <FaMapMarkerAlt className="mr-1 inline" />
+          {`Distance from midpoint: ${place.distance} km`}
+        </p>
       )}
 
-      {/* Address */}
       {details.formatted_address && (
-        <p className="text-sm text-gray-600 mb-2">{details.formatted_address}</p>
+        <p className="text-sm text-gray-600 mb-2">
+          <FaMapMarkerAlt className="mr-1 inline" />
+          {details.formatted_address}
+        </p>
       )}
 
-      {/* Opening Hours Status */}
       {isOpen !== null && (
         <p
           className={`text-sm mb-2 ${
@@ -158,31 +159,32 @@ function PlaceItem({ place }) {
         </p>
       )}
 
-      {/* Phone Number */}
       {details.formatted_phone_number && (
-        <p className="text-sm text-gray-600 mb-2">{`Phone: ${details.formatted_phone_number}`}</p>
+        <p className="text-sm text-gray-600 mb-2">
+          <FaPhone className="mr-1 inline" />
+          {details.formatted_phone_number}
+        </p>
       )}
 
-      {/* Website */}
       {details.website && (
         <a
           href={details.website}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-500 hover:underline block mb-2"
+          className="text-primary hover:underline block mb-2"
         >
           Visit Website
         </a>
       )}
 
-      {/* View on Google Maps */}
       {place.geometry && place.geometry.location && (
         <a
           href={`https://www.google.com/maps/search/?api=1&query=${place.geometry.location.lat},${place.geometry.location.lng}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-500 hover:underline"
+          className="text-primary hover:underline flex items-center"
         >
+          <FaMapMarkerAlt className="mr-1" />
           View on Google Maps
         </a>
       )}

@@ -7,7 +7,7 @@ function MapContainer({ center, markers }) {
   });
 
   return (
-    <div className="map-container">
+    <div className="map-container p-4 border rounded-lg shadow-sm bg-white">
       {isLoaded ? (
         <GoogleMap
           mapContainerStyle={{ width: '100%', height: '400px' }}

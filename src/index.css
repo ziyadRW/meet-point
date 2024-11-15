@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --primary-color: #1D4ED8; 
+  --primary-color-dark: #1E3A8A;
+}
+
+.bg-primary {
+  background-color: var(--primary-color, #1D4ED8);
+}

@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 
 const libraries = ['places'];
 
@@ -20,14 +21,12 @@ function LocationInput({ onSelectLocation }) {
         address: place.formatted_address,
       };
       onSelectLocation(location);
-
-      // Clear the input value after selecting a location
       autocompleteRef.current.input.value = '';
     }
   };
 
   return (
-    <div className="w-4/5 ml-4">
+    <div className="relative w-full">
       {isLoaded ? (
         <Autocomplete
           onLoad={(autocomplete) => {
@@ -35,20 +34,24 @@ function LocationInput({ onSelectLocation }) {
           }}
           onPlaceChanged={handlePlaceChanged}
         >
-          <input
-            type="text"
-            placeholder="Search for a location"
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            ref={(input) => {
-              if (autocompleteRef.current) {
-                autocompleteRef.current.input = input;
-              }
-            }}
-          />
+          <div className="relative w-full">
+            <FaMapMarkerAlt className="absolute left-3 top-3 text-primary" />
+            <input
+              type="text"
+              placeholder="Search for a location"
+              className="w-full p-2 pl-10 border border-gray-300 rounded-lg"
+              ref={(input) => {
+                if (autocompleteRef.current) {
+                  autocompleteRef.current.input = input;
+                }
+              }}
+            />
+          </div>
         </Autocomplete>
       ) : (
         <p>Loading map...</p>
       )}
+            <FaMapMarkerAlt className="absolute left-3 top-3 text-primary" />
     </div>
   );
 }
