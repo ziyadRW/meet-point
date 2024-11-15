@@ -1,8 +1,15 @@
 import React, { useRef } from 'react';
-import { Autocomplete } from '@react-google-maps/api';
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api';
+
+const libraries = ['places'];
 
 function LocationInput({ onSelectLocation }) {
   const autocompleteRef = useRef(null);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries,
+  });
 
   const handlePlaceChanged = () => {
     const place = autocompleteRef.current.getPlace();
@@ -13,7 +20,7 @@ function LocationInput({ onSelectLocation }) {
         address: place.formatted_address,
       };
       onSelectLocation(location);
-      
+
       // Clear the input value after selecting a location
       autocompleteRef.current.input.value = '';
     }
@@ -21,23 +28,27 @@ function LocationInput({ onSelectLocation }) {
 
   return (
     <div className="w-4/5 ml-4">
-      <Autocomplete
-        onLoad={(autocomplete) => {
-          autocompleteRef.current = autocomplete;
-        }}
-        onPlaceChanged={handlePlaceChanged}
-      >
-        <input
-          type="text"
-          placeholder="Search for a location"
-          className="w-full p-2 border border-gray-300 rounded-lg"
-          ref={(input) => {
-            if (autocompleteRef.current) {
-              autocompleteRef.current.input = input;
-            }
+      {isLoaded ? (
+        <Autocomplete
+          onLoad={(autocomplete) => {
+            autocompleteRef.current = autocomplete;
           }}
-        />
-      </Autocomplete>
+          onPlaceChanged={handlePlaceChanged}
+        >
+          <input
+            type="text"
+            placeholder="Search for a location"
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            ref={(input) => {
+              if (autocompleteRef.current) {
+                autocompleteRef.current.input = input;
+              }
+            }}
+          />
+        </Autocomplete>
+      ) : (
+        <p>Loading map...</p>
+      )}
     </div>
   );
 }

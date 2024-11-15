@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ResultsList from './ResultsList';
 
-function ResultsPage() {
-  const [keyword, setKeyword] = useState('');
-  const [places, setPlaces] = useState([]);
-  const location = useLocation();
+function ResultsPage({ midpoint, keyword, setKeyword }) {
   const navigate = useNavigate();
-  const midpoint = location.state?.midpoint;
+  const [places, setPlaces] = useState([]);
 
-  const handleSearch = async () => {
+  useEffect(() => {
+    if (keyword) {
+      handleSearch(keyword);
+    }
+  }, [keyword]);
+
+  const handleSearch = async (searchKeyword = keyword) => {
+    if (!midpoint) return;
+
     try {
       const response = await axios.get('http://localhost:3001/api/places', {
         params: {
-          query: keyword,
+          query: searchKeyword,
           location: `${midpoint.lat},${midpoint.lng}`,
           radius: 5000,
         },
@@ -42,7 +47,7 @@ function ResultsPage() {
           className="border p-2 w-full"
         />
         <button
-          onClick={handleSearch}
+          onClick={() => handleSearch()}
           className="px-4 py-2 bg-blue-500 text-white rounded"
         >
           Search Places

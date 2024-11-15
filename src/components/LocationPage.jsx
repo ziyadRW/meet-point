@@ -1,57 +1,110 @@
-import React, { useState } from 'react';
-import LocationSelector from './LocationSelector';
+import React, { useEffect, useState } from 'react';
+import LocationInput from './LocationInput';
 import LocationList from './LocationList';
+import MidpointCalculator from './MidpointCalculator';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-function LocationPage() {
-  const [peopleCount, setPeopleCount] = useState(0);
-  const [locations, setLocations] = useState([]);
+function LocationPage({
+  locations,
+  setLocations,
+  peopleCount,
+  setPeopleCount,
+  setMidpoint,
+  keyword,
+  setKeyword,
+}) {
   const navigate = useNavigate();
+  const [midpointAddress, setMidpointAddress] = useState('');
+
+  useEffect(() => {
+    if (locations.length === peopleCount && peopleCount > 0) {
+      const midpointCoords = MidpointCalculator(locations);
+      setMidpoint(midpointCoords);
+      fetchMidpointAddress(midpointCoords);
+    }
+  }, [locations, peopleCount, setMidpoint]);
 
   const handlePeopleCountChange = (e) => {
     setPeopleCount(Number(e.target.value));
   };
 
-  const handleLocationSelect = (location, address) => {
-    setLocations([...locations, { location, address }]);
+  const handleLocationSelect = (location) => {
+    setLocations((prevLocations) => [...prevLocations, location]);
   };
 
-  const handleProceedToSearch = () => {
-    navigate('/results', { state: { midpoint: calculateMidpoint() } });
+  const fetchMidpointAddress = async (coords) => {
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.lat},${coords.lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
+      );
+      if (response.data.results.length > 0) {
+        const addressComponents = response.data.results[0].address_components;
+        const city = addressComponents.find((component) =>
+          component.types.includes('administrative_area_level_1')
+        );
+        const district = addressComponents.find((component) =>
+          component.types.includes('sublocality_level_1')
+        );
+        setMidpointAddress(
+          `${district ? district.long_name : ''}, ${city ? city.long_name : ''}`
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching midpoint address:', error);
+    }
   };
 
-  const calculateMidpoint = () => {
-    const latitudes = locations.map(loc => loc.location.lat);
-    const longitudes = locations.map(loc => loc.location.lng);
-    const midpointLat = latitudes.reduce((a, b) => a + b, 0) / latitudes.length;
-    const midpointLng = longitudes.reduce((a, b) => a + b, 0) / longitudes.length;
-    return { lat: midpointLat, lng: midpointLng };
+  const handleSearchSubmit = () => {
+    if (keyword.trim() !== '') {
+      navigate('/results');
+    }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">MeetPoint - Meetup Organizer App</h1>
-      <div className="flex space-x-4 mb-4">
+    <div className="container mx-auto p-8 max-w-2xl text-center">
+      <h1 className="text-4xl font-bold mb-6">MeetPoint - Meetup Organizer App</h1>
+      <div className="flex items-center gap-4 justify-center mb-6">
         <input
           type="number"
+          min="1"
           value={peopleCount}
           onChange={handlePeopleCountChange}
-          placeholder="Enter number of people"
-          className="border p-2 w-1/5"
+          className="w-1/4 p-2 border border-gray-300 rounded-lg"
+          placeholder="Number of people"
         />
-        <LocationSelector
-          onSelectLocation={handleLocationSelect}
-          disabled={locations.length >= peopleCount}
-        />
+        <LocationInput onSelectLocation={handleLocationSelect} />
       </div>
       <LocationList locations={locations} setLocations={setLocations} />
-      {locations.length === peopleCount && (
-        <button
-          onClick={handleProceedToSearch}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Proceed to Search for Places
-        </button>
+
+      {locations.length < peopleCount && peopleCount > 0 && (
+        <p className="mt-4 text-gray-500">
+          Remaining locations to enter: {peopleCount - locations.length}
+        </p>
+      )}
+
+      {locations.length === peopleCount && peopleCount > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold">Approximate Meetpoint:</h2>
+          <p className="text-lg">
+            {midpointAddress ? midpointAddress : 'Calculating midpoint address...'}
+          </p>
+          <div className="mt-4 flex justify-center gap-4">
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="Enter keyword (e.g., coffee shop)"
+              className="p-2 border border-gray-300 rounded-lg w-3/4"
+            />
+            <button
+              onClick={handleSearchSubmit}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            >
+              Search
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
