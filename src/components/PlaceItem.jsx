@@ -4,11 +4,12 @@ import axios from 'axios';
 function PlaceItem({ place }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photos, setPhotos] = useState(place.photos || []);
+  const [details, setDetails] = useState({});
+  const [isOpen, setIsOpen] = useState(null);
+  const [closingTime, setClosingTime] = useState('');
 
-  // Convert rating to stars (1 to 5 scale)
   const ratingStars = Math.round(place.rating || 0);
 
-  // Function to fetch additional photos for a place using its place_id
   const fetchPlaceDetails = async (placeId) => {
     try {
       console.log(`Fetching place details for place_id: ${placeId}`);
@@ -18,28 +19,58 @@ function PlaceItem({ place }) {
         },
       });
       console.log('Place details fetched:', response.data);
-      return response.data.result.photos || [];
+      return response.data.result || {};
     } catch (error) {
       console.error('Error fetching place details:', error);
-      return [];
+      return {};
     }
   };
 
   useEffect(() => {
-    // Fetch more photos if available
-    const fetchAdditionalPhotos = async () => {
+    const fetchAdditionalDetails = async () => {
       if (place.place_id) {
-        const additionalPhotos = await fetchPlaceDetails(place.place_id);
-        if (additionalPhotos.length > 1) {
-          setPhotos(additionalPhotos);
+        const placeDetails = await fetchPlaceDetails(place.place_id);
+        setDetails(placeDetails);
+        if (placeDetails.photos && placeDetails.photos.length > 1) {
+          setPhotos(placeDetails.photos);
+        }
+
+        if (placeDetails.opening_hours && placeDetails.opening_hours.periods) {
+          const today = new Date().getDay(); // 0 is Sunday, 6 is Saturday
+          const currentTime = new Date();
+          const todayPeriods = placeDetails.opening_hours.periods.find(
+            (period) => period.open && period.open.day === today
+          );
+
+          if (todayPeriods) {
+            const openTime = new Date(currentTime);
+            const closeTime = new Date(currentTime);
+
+            openTime.setHours(todayPeriods.open.time.substring(0, 2));
+            openTime.setMinutes(todayPeriods.open.time.substring(2, 4));
+
+            closeTime.setHours(todayPeriods.close.time.substring(0, 2));
+            closeTime.setMinutes(todayPeriods.close.time.substring(2, 4));
+
+            if (currentTime >= openTime && currentTime < closeTime) {
+              setIsOpen(true);
+              setClosingTime(
+                `Closes at ${todayPeriods.close.time.substring(0, 2)}:${todayPeriods.close.time.substring(2, 4)}`
+              );
+            } else {
+              setIsOpen(false);
+              setClosingTime(
+                `Closed at ${todayPeriods.close.time.substring(0, 2)}:${todayPeriods.close.time.substring(2, 4)}`
+              );
+            }
+          }
         }
       }
     };
 
-    fetchAdditionalPhotos();
+    fetchAdditionalDetails();
   }, [place.place_id]);
 
-  // Handle next and previous images for carousel
   const handleNextImage = () => {
     if (photos.length > 1) {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % photos.length);
@@ -66,15 +97,12 @@ function PlaceItem({ place }) {
           />
           {photos.length > 1 && (
             <>
-              {/* Previous Image Button */}
               <button
                 onClick={handlePrevImage}
                 className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
               >
                 &larr;
               </button>
-
-              {/* Next Image Button */}
               <button
                 onClick={handleNextImage}
                 className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
@@ -109,9 +137,42 @@ function PlaceItem({ place }) {
         </div>
       )}
 
+      {/* Distance from Midpoint */}
+      {place.distance && (
+        <p className="text-sm text-gray-600 mb-2">{`Distance from midpoint: ${place.distance} km`}</p>
+      )}
+
       {/* Address */}
-      {place.formatted_address && (
-        <p className="text-sm text-gray-600 mb-2">{place.formatted_address}</p>
+      {details.formatted_address && (
+        <p className="text-sm text-gray-600 mb-2">{details.formatted_address}</p>
+      )}
+
+      {/* Opening Hours Status */}
+      {isOpen !== null && (
+        <p
+          className={`text-sm mb-2 ${
+            isOpen ? 'text-green-500' : 'text-red-500'
+          }`}
+        >
+          {closingTime}
+        </p>
+      )}
+
+      {/* Phone Number */}
+      {details.formatted_phone_number && (
+        <p className="text-sm text-gray-600 mb-2">{`Phone: ${details.formatted_phone_number}`}</p>
+      )}
+
+      {/* Website */}
+      {details.website && (
+        <a
+          href={details.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline block mb-2"
+        >
+          Visit Website
+        </a>
       )}
 
       {/* View on Google Maps */}
