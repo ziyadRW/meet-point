@@ -1,22 +1,23 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import ResultsList from './ResultsList'
-import { FaArrowLeft } from 'react-icons/fa'
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import ResultsList from './ResultsList';
+import { FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
 
-export default function ResultsPage({ midpoint, keyword, setKeyword }) {
-  const navigate = useNavigate()
-  const [places, setPlaces] = useState([])
-  const [sortOption, setSortOption] = useState('highest_rating')
+export default function ResultsPage({ midpoint, keyword, setKeyword, onPlaceSelect }) {
+  const navigate = useNavigate();
+  const [places, setPlaces] = useState([]);
+  const [sortOption, setSortOption] = useState('highest_rating');
+  const [selectedPlace, setSelectedPlace] = useState(null);
 
   useEffect(() => {
     if (keyword) {
-      handleSearch(keyword)
+      handleSearch(keyword);
     }
-  }, [keyword])
+  }, [keyword]);
 
   const handleSearch = async (searchKeyword = keyword) => {
-    if (!midpoint) return
+    if (!midpoint) return;
 
     try {
       const response = await axios.get('http://localhost:3001/api/places', {
@@ -25,32 +26,37 @@ export default function ResultsPage({ midpoint, keyword, setKeyword }) {
           location: `${midpoint.lat},${midpoint.lng}`,
           radius: 5000,
         },
-      })
-      let fetchedPlaces = response.data.results
-      fetchedPlaces = sortPlaces(fetchedPlaces, sortOption)
-      setPlaces(fetchedPlaces)
+      });
+      let fetchedPlaces = response.data.results;
+      fetchedPlaces = sortPlaces(fetchedPlaces, sortOption);
+      setPlaces(fetchedPlaces);
     } catch (error) {
-      console.error('Error fetching places: ', error)
+      console.error('Error fetching places: ', error);
     }
-  }
+  };
 
   const sortPlaces = (places, option) => {
     if (option === 'nearest') {
-      return [...places].sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
+      return [...places].sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
     } else if (option === 'highest_rating') {
-      return [...places].sort((a, b) => b.rating - a.rating)
+      return [...places].sort((a, b) => b.rating - a.rating);
     } else {
-      return places
+      return places;
     }
-  }
+  };
 
   const handleSortChange = (e) => {
-    setSortOption(e.target.value)
-    setPlaces(sortPlaces(places, e.target.value))
-  }
+    setSortOption(e.target.value);
+    setPlaces(sortPlaces(places, e.target.value));
+  };
+
+  const handlePlaceSelect = (place) => {
+    setSelectedPlace(place);
+    onPlaceSelect(place);
+  };
 
   return (
-    <div className="bg-white shadow-sm rounded-xl p-6">
+    <div className="bg-white shadow-sm rounded-xl p-6 relative">
       <button
         onClick={() => navigate('/')}
         className="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium mb-6"
@@ -58,7 +64,9 @@ export default function ResultsPage({ midpoint, keyword, setKeyword }) {
         <FaArrowLeft className="mr-2 h-4 w-4" />
         Back to Location Page
       </button>
-      
+
+      <h2 className="text-2xl font-bold mb-6 text-center">Choose meet Place</h2>
+
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <input
           type="text"
@@ -77,7 +85,21 @@ export default function ResultsPage({ midpoint, keyword, setKeyword }) {
         </select>
       </div>
 
-      <ResultsList places={places} />
+      <ResultsList
+        places={places}
+        onPlaceSelect={handlePlaceSelect}
+        selectedPlace={selectedPlace}
+      />
+
+{selectedPlace && (
+  <button
+    onClick={() => navigate('/invite')}
+    className="fixed bottom-10 right-10 px-6 py-3 m-8 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 ease-in-out animate-bounce flex items-center gap-2"
+  >
+    <FaPaperPlane className="h-5 w-5" />
+    Send Invitation
+  </button>
+)}
     </div>
-  )
+  );
 }

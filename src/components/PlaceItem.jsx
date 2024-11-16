@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 
-function PlaceItem({ place }) {
+function PlaceItem({ place, onSelect, isSelected }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photos, setPhotos] = useState(place.photos || []);
   const [details, setDetails] = useState({});
@@ -87,7 +87,12 @@ function PlaceItem({ place }) {
   };
 
   return (
-    <div className="place-item p-4 border rounded-lg shadow-lg bg-white relative">
+    <div
+      onClick={onSelect}
+      className={`place-item p-4 border rounded-lg shadow-lg relative cursor-pointer transition duration-150 ease-in-out ${
+        isSelected ? 'bg-blue-100 border-blue-500' : 'bg-white border-gray-200 hover:bg-gray-50'
+      }`}
+    >
       {photos.length > 0 && (
         <div className="relative mb-4">
           <img
@@ -98,13 +103,19 @@ function PlaceItem({ place }) {
           {photos.length > 1 && (
             <>
               <button
-                onClick={handlePrevImage}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevImage();
+                }}
                 className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
               >
                 &larr;
               </button>
               <button
-                onClick={handleNextImage}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextImage();
+                }}
                 className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
               >
                 &rarr;
