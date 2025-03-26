@@ -4,6 +4,7 @@
         "src": "package.json",
         "use": "@vercel/node"
       }
-    ]
+    ],
+    "buildCommand": "npm run dev"
   }
   
